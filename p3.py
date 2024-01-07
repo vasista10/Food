@@ -1,35 +1,38 @@
 import csv
 
-with open("p3.csv") as f:
-    csv_file = csv.reader(f)
-    data = list(csv_file)
+file = open(r'C:\Users\shash\OneDrive\Documents\github\Food\p3.csv')
+data = list(csv.reader(file))[1:]
 
-    specific = data[0][:-1]
-    general = [['?' for i in range(len(specific))] for j in range(len(specific))]
+concepts = []
+target = []
 
-    for i in data:
-        if i[-1] == "Yes":
-            for j in range(len(specific)):
-                if i[j] != specific[j]:
-                    specific[j] = "?"
-                    general[j][j] = "?"
+for i in data:
+    if len(i) >= 1:
+        concepts.append(i[:-1])
+        target.append(i[-1])
+    else:
+        print("Invalid data format in CSV file")
 
-        elif i[-1] == "No":
-            for j in range(len(specific)):
-                if i[j] != specific[j]:
-                    general[j][j] = specific[j]
-                else:
-                    general[j][j] = "?"
+specific_h = concepts[0].copy()
+general_h = [['?' for _ in range(len(specific_h))] for _ in range(len(specific_h))]
 
-        print("\nStep " + str(data.index(i)+1) + " of Candidate Elimination Algorithm")
-        print(specific)
-        print(general)
+for i, h in enumerate(concepts):
+    if target[i] == "yes":
+        for x in range(len(specific_h)):
+            if h[x] != specific_h[x]:
+                specific_h[x] = '?'
+                general_h[x][x] = '?'
+    elif target[i] == "no":
+        for x in range(len(specific_h)):
+            if h[x] != specific_h[x]:
+                general_h[x][x] = specific_h[x]
+            else:
+                general_h[x][x] = '?'
 
-    gh = [] # gh = general Hypothesis
-    for i in general:
-        for j in i:
-            if j != '?':
-                gh.append(i)
-                break
-    print("\nFinal Specific hypothesis:\n", specific)
-    print("\nFinal General hypothesis:\n", gh)
+indices = [i for i, val in enumerate(general_h) if val == ['?' for _ in range(len(specific_h))]]
+
+for i in indices:
+    general_h.remove(['?' for _ in range(len(specific_h))])
+
+print("Final Specific:", specific_h, sep="\n")
+print("Final General:", general_h, sep="\n")
