@@ -1,42 +1,45 @@
 import pandas as pd
-from pprint import pprint
-from sklearn.feature_selection import mutual_info_classif
-from collections import Counter
+from sklearn.tree import DecisionTreeClassifier, export_text
 
-def id3(df, target_attribute, attribute_names, default_class=None):
-    cnt=Counter(x for x in df[target_attribute])
-    if len(cnt)==1:
-        return next(iter(cnt))
+# Read the dataset
+data = pd.read_csv(r"C:\Users\shash\OneDrive\Documents\github\Food\csvfiles\p4.csv")
+
+# One-hot encode categorical variables
+data = pd.get_dummies(data, columns=['Outlook', 'Temperature', 'Humidity', 'Wind'])
+
+# Features and target variable
+X = data.drop('PlayTennis', axis=1)
+y = data['PlayTennis']
+
+# Build the decision tree model
+model = DecisionTreeClassifier(criterion='entropy')
+model.fit(X, y)
+
+# Display the decision tree
+tree_rules = export_text(model, feature_names=list(X.columns))
+print("Decision Tree:")
+print(tree_rules)
+
+# Classify a new sample
+def classify_sample(instance):
+    instance = instance.split(',')
+    instance_dict = {}
+    for i, column in enumerate(X.columns):
+        if i < len(instance):
+            instance_dict[column] = instance[i]
+        else:
+            instance_dict[column] = '0'  # If the value is missing, assume '0' for simplicity
+    instance_df = pd.DataFrame(instance_dict, index=[0])
+    instance_df = pd.get_dummies(instance_df)
     
-    elif df.empty or (not attribute_names):
-         return default_class
-
-    else:
-        gainz = mutual_info_classif(df[attribute_names],df[target_attribute],discrete_features=True)
-        index_of_max=gainz.tolist().index(max(gainz))
-        best_attr=attribute_names[index_of_max]
-        tree={best_attr:{}}
-        remaining_attribute_names=[i for i in attribute_names if i!=best_attr]
-        
-        for attr_val, data_subset in df.groupby(best_attr):
-            subtree=id3(data_subset, target_attribute, remaining_attribute_names,default_class)
-            tree[best_attr][attr_val]=subtree
-        
-        return tree
+    # Align the columns of instance_df with X to ensure consistency
+    instance_df = instance_df.reindex(columns=X.columns, fill_value=0)
     
+    prediction = model.predict(instance_df)
+    return prediction[0]
 
-df=pd.read_csv("data.csv")
-
-attribute_names=df.columns.tolist()
-print("List of attribut name")
-
-attribute_names.remove("PlayTennis")
-
-for colname in df.select_dtypes("object"):
-    df[colname], _ = df[colname].factorize()
-    
-print(df)
-
-tree= id3(df,"PlayTennis", attribute_names)
-print("The tree structure")
-pprint(tree)
+# Take user input for the test instance
+user_input = input("Enter a test instance (comma-separated values): ")
+output_class = classify_sample(user_input)
+print(f"\nUser Input: {user_input}")
+print(f"Output Class: {output_class}")

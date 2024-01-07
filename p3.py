@@ -1,6 +1,6 @@
 import csv
 
-file = open(r'C:\Users\shash\OneDrive\Documents\github\Food\p3.csv')
+file = open(r'C:\Users\shash\OneDrive\Documents\github\Food\csvfiles\p3.csv')
 data = list(csv.reader(file))[1:]
 
 concepts = []

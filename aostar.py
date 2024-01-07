@@ -1,5 +1,5 @@
 import csv
-file = open(r"C:\Users\shash\Downloads\Lab1data_new.csv") # Read CSV data
+file = open(r"C:\Users\shash\OneDrive\Documents\github\Food\csvfiles\p2.csv") # Read CSV data
 data = list(csv.reader(file)) # Convert into list format
 length = len(data[0]) - 1 # -1 because we don't need the target variable
 h = ['0'] * length # Initial hypothesis
